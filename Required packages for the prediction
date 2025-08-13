@@ -1,0 +1,5 @@
+!pip install tabula-py
+!pip install pandas
+!pip install numpy
+!pip install sklearn
+!pip install pickle
