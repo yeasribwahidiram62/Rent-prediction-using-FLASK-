@@ -1,0 +1,139 @@
+from IPython.display import HTML
+
+html_content = """
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Rent Prediction based on size of the house</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        font-style: arial;
+        color: black;
+        background-color: white;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+      .card {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        background-color: white;
+      }
+      label, input {
+        display: block;
+        width: 100%;
+        color: black;
+        font-style: arial;
+      }
+      input[type="number"] {
+        padding: 10px;
+        margin-top: 6px;
+        margin-bottom: 12px;
+        font-size: 16px;
+        background-color: white;
+        font-style: arial;
+        color: black;
+      }
+      .input-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      .input-group input[type="number"] {
+        flex-grow: 1;
+        width: auto;
+      }
+      button, .btn-step {
+        padding: 10px 16px;
+        font-size: 16px;
+        cursor: pointer;
+        font-style: arial;
+        color: black;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .btn-step {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        font-weight: bold;
+        line-height: 1;
+      }
+      #result {
+        margin-top: 16px;
+        font-weight: 600;
+        color: black;
+      }
+      h2 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: black;
+        font-style: arial;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>🏠 Rent Prediction based on size of the house</h2>
+      <form id="predict-form">
+        <label for="size">Size (square feet)</label>
+        <div class="input-group">
+          <button type="button" class="btn-step" id="decrease">−</button>
+          <input id="size" name="size" type="number" step="any" required placeholder="e.g., 1200" value="1200" />
+          <button type="button" class="btn-step" id="increase">+</button>
+        </div>
+        <button type="submit">Predict Rent</button>
+      </form>
+      <div id="result"></div>
+    </div>
+    <script>
+      const form = document.getElementById("predict-form");
+      const resultDiv = document.getElementById("result");
+      const sizeInput = document.getElementById("size");
+      const increaseBtn = document.getElementById("increase");
+      const decreaseBtn = document.getElementById("decrease");
+
+      increaseBtn.addEventListener("click", () => {
+        const step = parseFloat(sizeInput.step) || 1;
+        const current = parseFloat(sizeInput.value) || 0;
+        sizeInput.value = (current + step).toFixed(2);
+      });
+
+      decreaseBtn.addEventListener("click", () => {
+        const step = parseFloat(sizeInput.step) || 1;
+        const current = parseFloat(sizeInput.value) || 0;
+        const newVal = current - step;
+        sizeInput.value = newVal > 0 ? newVal.toFixed(2) : "0";
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        resultDiv.textContent = "Predicting...";
+        const formData = new FormData(form);
+        try {
+          const res = await fetch("/predict", { method: "POST", body: formData });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: "Server error" }));
+            resultDiv.textContent = "Error: " + (err.error || "Unknown error");
+            return;
+          }
+          const data = await res.json();
+          resultDiv.textContent = data.result;
+        } catch (err) {
+          resultDiv.textContent = "Network error.";
+        }
+      });
+    </script>
+  </body>
+</html>
+"""
+
+display(HTML(html_content))
